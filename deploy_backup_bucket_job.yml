@@ -1,0 +1,30 @@
+#couchbase/tasks/backup_bucket_job.yml
+---
+- hosts: '{{ hosts }}'
+  serial: 1
+  vars:
+    local_software_dir: /home/<username>/scripts/backup_bucket/
+    remote_software_dir: /opt/couchbase/backups/
+  tasks:
+    - name: create folder
+      file: path=/opt/couchbase/backups/archive state=directory mode=0755
+       owner=couchbase
+       group=couchbase
+       recurse=True
+      sudo: True
+
+    - name: copy from local to the hosts
+      copy:
+       src:  "{{ local_software_dir }}"
+       dest: "{{ remote_software_dir }}"
+       owner: couchbase
+       group: couchbase
+      sudo: True
+
+    - name: cron job to backup couchbase bucket
+      cron: >
+       name="backup configuration bucket"
+       minute="0,30"
+       user=couchbase
+       job="/usr/bin/python /opt/couchbase/backups/backup_bucket.py > /opt/couchbase/backups/backup.log 2>&1"
+      sudo: True
