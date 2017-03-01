@@ -1,7 +1,6 @@
 #==========================================================#
 # backup_bucket.py
 # sjdillon
-# 07/29/2016
 # backup coucbhase, zip and delete older backups
 #==========================================================#
 import os
@@ -36,6 +35,7 @@ def send_email(msg):
         subject='couchbase backup bucket failed'
         body=msg
         message = """Subject: %s\n\n%s\n""" % (subject, body)
+
         server = smtplib.SMTP('localhost')
         server.sendmail(from_addr,to_addr,message)
         server.quit()
@@ -79,6 +79,7 @@ def run_all(bucket,archive_dir):
                 print '###execution time:%fs' % (timeit.default_timer()-start)
                 if status!=0:
                         raise NameError('couchbase backup failed')
+
                 ## zip backup and move to archive dir
                 start = timeit.default_timer()
                 print '###zip backup'
@@ -98,8 +99,10 @@ def run_all(bucket,archive_dir):
                 print '###execution time:%fs' % (timeit.default_timer()-start)
         except Exception, e:
                 print 'ERROR: %s'% ( str(e) )
-                print traceback.print_exc()
+                traceback.print_exc()
                 send_email(str(e))
+
+
 
 buckets=get_config('backups','bucket_names')
 for bucket in buckets.split():
